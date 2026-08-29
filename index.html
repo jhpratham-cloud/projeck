@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Network Shooter</title>
+    <style>
+        body {
+            margin: 0;
+            background: #111827;
+            display: grid;
+            place-items: center;
+            height: 100vh;
+            color: white;
+            font-family: sans-serif;
+        }
+
+        canvas {
+            background: #182235;
+            border: 2px solid white;
+            max-width: 95vw;
+            height: auto;
+        }
+
+        #username-form {
+            position: fixed;
+            inset: 0;
+            display: grid;
+            place-content: center;
+            gap: 10px;
+            background: #111827;
+        }
+
+        input,
+        button {
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        #game {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <form id="username-form">
+        <label for="username">Choose a username</label>
+        <input id="username" maxlength="16" required autofocus>
+        <button>Enter game</button>
+    </form>
+    <canvas id="game" width="800" height="500"></canvas>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='game.js') }}"></script>
+</body>
+
+</html>
