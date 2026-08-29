@@ -161,7 +161,7 @@ let leaderboardVisible = true;
 
 let recoil = {
     amount: 0,
-    velocity: 0
+    velocity: -1
 };
 
 const RECOIL_STRENGTH = 9.5;
