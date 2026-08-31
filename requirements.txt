@@ -1,3 +1,4 @@
-Flask
-Flask-SocketIO
-eventlet
+flask
+flask-socketio
+gevent
+gevent-websocket
