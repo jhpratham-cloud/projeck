@@ -1,10 +1,13 @@
 const canvas = document.querySelector("#game");
 const ctx = canvas.getContext("2d");
 const form = document.querySelector("#username-form");
-const socket = io({
-    transports: ['websocket', 'polling'],
-    rememberUpgrade: true,
-    secure: true
+// Automatically handles both local testing and secure live server connections
+const socket = io(window.location.origin, {
+    transports: ['polling', 'websocket'],
+    upgrade: true,
+    reconnection: true,
+    reconnectionAttempts: 10,
+    timeout: 20000
 });
 
 
