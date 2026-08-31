@@ -108,7 +108,7 @@ def handle_shoot(data):
             return
         
         bullets.append({
-            "id": uuid.uuid4().hex,  # Fixes multi-hit lag spike
+            "id": uuid.uuid4().hex,
             "owner": request.sid,
             "x": player["x"],
             "y": player["y"],
@@ -150,7 +150,3 @@ def game_loop():
 if __name__ == "__main__":
     threading.Thread(target=game_loop, daemon=True).start()
     socketio.run(app, host="0.0.0.0", port=5000)
-        
-        # Ensures health only regenerates using the heal key (F)
-        if data.get("ability") == "heal":
-            player["health"] = min(PLAYER_HEALTH, player["health"] + 50)
