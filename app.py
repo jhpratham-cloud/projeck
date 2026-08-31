@@ -73,6 +73,10 @@ bots = [
 
 lock = threading.Lock()
 
+@app.route("/")
+def index():
+    return render_template("index.html")
+
 @socketio.on("connect")
 def handle_connect():
     with lock:
