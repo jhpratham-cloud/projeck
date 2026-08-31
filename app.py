@@ -1,3 +1,6 @@
+from gevent import monkey
+monkey.patch_all()
+
 import math
 import random
 import threading
