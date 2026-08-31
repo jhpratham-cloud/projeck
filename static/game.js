@@ -1,7 +1,11 @@
 const canvas = document.querySelector("#game");
 const ctx = canvas.getContext("2d");
 const form = document.querySelector("#username-form");
-const socket = io();
+const socket = io({
+    transports: ['websocket'],
+    upgrade: false
+});
+
 
 ctx.imageSmoothingEnabled = true;
 
