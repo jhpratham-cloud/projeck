@@ -33,7 +33,6 @@ TICK_RATE = 0.05
 
 
 def random_spawn():
-    
     x = random.randint(PLAYER_RADIUS, WORLD_WIDTH - PLAYER_RADIUS)
     y = random.randint(PLAYER_RADIUS, WORLD_HEIGHT - PLAYER_RADIUS)
     return x, y
@@ -42,12 +41,10 @@ def random_spawn():
 def game_loop():
     while True:
         with lock:
-            
             for bullet in bullets[:]:
                 bullet["x"] += bullet["vx"]
                 bullet["y"] += bullet["vy"]
 
-                
                 if (
                     bullet["x"] < 0
                     or bullet["x"] > WORLD_WIDTH
@@ -57,7 +54,6 @@ def game_loop():
                     bullets.remove(bullet)
                     continue
 
-                
                 for player_id, player in players.items():
                     if player_id == bullet["owner"]:
                         continue
@@ -69,18 +65,13 @@ def game_loop():
 
                     if distance < PLAYER_RADIUS + BULLET_RADIUS:
                         player["health"] -= BULLET_DAMAGE
-
-                        
                         bullets.remove(bullet)
 
-                        
                         if player["health"] <= 0:
-                            player["x"], player["y"] = random_spawn()
-                            player["health"] = PLAYER_HEALTH
+                            player["health"] = 0
 
                         break
 
-            
             state = {
                 "players": {
                     player_id: {
@@ -138,7 +129,7 @@ def move(data):
     with lock:
         player = players.get(request.sid)
 
-        if not player:
+        if not player or player["health"] <= 0:
             return
 
         try:
@@ -147,7 +138,6 @@ def move(data):
         except (TypeError, ValueError):
             return
 
-        
         if not math.isfinite(new_x) or not math.isfinite(new_y):
             return
 
@@ -170,7 +160,7 @@ def shoot(target):
     with lock:
         player = players.get(request.sid)
 
-        if not player:
+        if not player or player["health"] <= 0:
             return
 
         try:
@@ -187,8 +177,6 @@ def shoot(target):
 
         distance = math.hypot(dx, dy)
 
-        
-        
         if distance < 0.001:
             return
 
@@ -202,6 +190,34 @@ def shoot(target):
             }
         )
 
+@socketio.on("ability")
+def handle_ability(data):
+    if not isinstance(data, dict): 
+        return
+    
+    with lock:
+        player = players.get(request.sid)
+        if not player: 
+            return
+        
+        if data.get("ability") == "heal":
+            if player["health"] <= 0:
+                player["x"], player["y"] = random_spawn()
+                player["health"] = PLAYER_HEALTH
+            else:
+                player["health"] = min(PLAYER_HEALTH, player["health"] + 35)
+
+@socketio.on("take_damage")
+def take_damage(data):
+    if not isinstance(data, dict): 
+        return
+    
+    with lock:
+        player = players.get(request.sid)
+        if player and player["health"] > 0:
+            player["health"] -= data.get("amount", 0)
+            if player["health"] <= 0:
+                player["health"] = 0
 
 @socketio.on("disconnect")
 def disconnect():
