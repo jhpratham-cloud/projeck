@@ -1,56 +1,48 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <title>Network Shooter</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Shooter Arena</title>
     <style>
-        body {
-            margin: 0;
-            background: #111827;
-            display: grid;
-            place-items: center;
-            height: 100vh;
-            color: white;
-            font-family: sans-serif;
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background-color: #f0f3f7;
+            font-family: 'Inter', system-ui, sans-serif;
         }
-
-        canvas {
-            background: #182235;
-            border: 2px solid white;
-            max-width: 95vw;
-            height: auto;
-        }
-
         #username-form {
-            position: fixed;
-            inset: 0;
-            display: grid;
-            place-content: center;
-            gap: 10px;
-            background: #111827;
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); text-align: center;
+            background: white; padding: 30px; border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 10;
         }
-
-        input,
-        button {
-            padding: 10px;
-            font-size: 16px;
+        #username-form h2 { margin-top: 0; color: #26313d; }
+        #username {
+            padding: 10px; font-size: 16px; border: 2px solid #aeb8c4;
+            border-radius: 6px; width: 200px; outline: none;
         }
-
-        #game {
-            display: none;
+        #username:focus { border-color: #00a8ff; }
+        #join-btn {
+            padding: 10px 20px; font-size: 16px; background: #00a8ff;
+            color: white; border: none; border-radius: 6px;
+            cursor: pointer; margin-left: 10px; font-weight: bold;
         }
+        #join-btn:hover { background: #0077cc; }
+        #game { display: none; width: 100vw; height: 100vh; }
     </style>
+    <!-- Socket.io client script library inside template -->
+    <script src="https://socket.io"></script>
 </head>
-
 <body>
+
     <form id="username-form">
-        <label for="username">Choose a username</label>
-        <input id="username" maxlength="16" required autofocus>
-        <button>Enter game</button>
+        <h2>Enter Arena</h2>
+        <input type="text" id="username" placeholder="Choose username" maxlength="16" required>
+        <button type="submit" id="join-btn">Join</button>
     </form>
-    <canvas id="game" width="800" height="500"></canvas>
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+    <canvas id="game"></canvas>
+
     <script src="{{ url_for('static', filename='game.js') }}"></script>
 </body>
-
 </html>
