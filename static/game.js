@@ -23,7 +23,7 @@ const TRAIL_LIMIT = 900;
 // ============================================================
 
 const tankImage = new Image();
-tankImage.src = "tank.png";
+tankImage.src = "/static/tank.png";
 
 let tankImageReady = false;
 
