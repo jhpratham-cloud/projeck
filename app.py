@@ -1,10 +1,8 @@
 from gevent import monkey
 monkey.patch_all()
-
 import math
 import random
 import threading
-import os
 
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
@@ -15,9 +13,7 @@ socketio = SocketIO(
     app,
     cors_allowed_origins="*",
     async_mode="gevent",
-    manage_session=False
 )
-
 
 players = {}
 bullets = []
@@ -31,12 +27,13 @@ PLAYER_HEALTH = 100
 
 BULLET_SPEED = 9
 BULLET_DAMAGE = 20
-BULLET_RADIUS = 4
+BULLET_RADIUS = 5
 
-TICK_RATE = 0.02
+TICK_RATE = 0.05
 
 
 def random_spawn():
+    
     x = random.randint(PLAYER_RADIUS, WORLD_WIDTH - PLAYER_RADIUS)
     y = random.randint(PLAYER_RADIUS, WORLD_HEIGHT - PLAYER_RADIUS)
     return x, y
@@ -45,10 +42,12 @@ def random_spawn():
 def game_loop():
     while True:
         with lock:
+            
             for bullet in bullets[:]:
                 bullet["x"] += bullet["vx"]
                 bullet["y"] += bullet["vy"]
 
+                
                 if (
                     bullet["x"] < 0
                     or bullet["x"] > WORLD_WIDTH
@@ -58,6 +57,7 @@ def game_loop():
                     bullets.remove(bullet)
                     continue
 
+                
                 for player_id, player in players.items():
                     if player_id == bullet["owner"]:
                         continue
@@ -69,16 +69,18 @@ def game_loop():
 
                     if distance < PLAYER_RADIUS + BULLET_RADIUS:
                         player["health"] -= BULLET_DAMAGE
-                        
-                        if bullet in bullets:
-                            bullets.remove(bullet)
 
+                        
+                        bullets.remove(bullet)
+
+                        
                         if player["health"] <= 0:
                             player["x"], player["y"] = random_spawn()
                             player["health"] = PLAYER_HEALTH
 
                         break
 
+            
             state = {
                 "players": {
                     player_id: {
@@ -111,11 +113,13 @@ def home():
 @socketio.on("join")
 def join(username):
     name = str(username or "").strip()[:16]
+
     if not name:
         name = "Player"
 
     with lock:
         x, y = random_spawn()
+
         players[request.sid] = {
             "name": name,
             "x": x,
@@ -133,6 +137,7 @@ def move(data):
 
     with lock:
         player = players.get(request.sid)
+
         if not player:
             return
 
@@ -142,11 +147,19 @@ def move(data):
         except (TypeError, ValueError):
             return
 
+        
         if not math.isfinite(new_x) or not math.isfinite(new_y):
             return
 
-        player["x"] = max(PLAYER_RADIUS, min(WORLD_WIDTH - PLAYER_RADIUS, new_x))
-        player["y"] = max(PLAYER_RADIUS, min(WORLD_HEIGHT - PLAYER_RADIUS, new_y))
+        player["x"] = max(
+            PLAYER_RADIUS,
+            min(WORLD_WIDTH - PLAYER_RADIUS, new_x),
+        )
+
+        player["y"] = max(
+            PLAYER_RADIUS,
+            min(WORLD_HEIGHT - PLAYER_RADIUS, new_y),
+        )
 
 
 @socketio.on("shoot")
@@ -156,6 +169,7 @@ def shoot(target):
 
     with lock:
         player = players.get(request.sid)
+
         if not player:
             return
 
@@ -170,8 +184,11 @@ def shoot(target):
 
         dx = target_x - player["x"]
         dy = target_y - player["y"]
+
         distance = math.hypot(dx, dy)
 
+        
+        
         if distance < 0.001:
             return
 
@@ -190,10 +207,21 @@ def shoot(target):
 def disconnect():
     with lock:
         players.pop(request.sid, None)
-        bullets[:] = [bullet for bullet in bullets if bullet["owner"] != request.sid]
+
+        bullets[:] = [
+            bullet
+            for bullet in bullets
+            if bullet["owner"] != request.sid
+        ]
 
 
 if __name__ == "__main__":
     socketio.start_background_task(game_loop)
-    port = int(os.environ.get("PORT", 8000))
-    socketio.run(app, host="0.0.0.0", port=port, debug=False, use_reloader=False)
+
+    socketio.run(
+        app,
+        host="0.0.0.0",
+        port=8000,
+        debug=False,
+        use_reloader=False,
+    )
